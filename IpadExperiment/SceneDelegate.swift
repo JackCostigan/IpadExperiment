@@ -18,7 +18,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = ViewController() // Your initial view controller.
+        let split = UISplitViewController(style: .doubleColumn)
+        split.viewControllers = [DogViewController(), WoofViewController()]
+        window.rootViewController = split
         window.makeKeyAndVisible()
         self.window = window
     }
