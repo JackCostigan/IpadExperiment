@@ -7,103 +7,73 @@
 
 import UIKit
 
-class DogViewController: UIViewController {
-    lazy var image: UIImageView = {
-        let image = UIImageView()
-        image.translatesAutoresizingMaskIntoConstraints = false
-        image.image = UIImage(systemName: "dog.circle")
-        return image
-    }()
+class ViewController: UIViewController {
+    let content: [Content] = [
+        .init(title: "dog") { DogViewController() },
+        .init(title: "woof") { WoofViewController() }
+    ]
+    lazy var split = UISplitViewController(style: .doubleColumn)
+    lazy var list = ListViewController(content: content.map { $0.title })
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupSubviews()
     }
     
-    func setupSubviews() {
-        view.addSubview(image)
-        view.backgroundColor = .white
-        NSLayoutConstraint.activate([
-            image.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            image.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            image.heightAnchor.constraint(equalToConstant: 100.0),
-            image.widthAnchor.constraint(equalTo: image.heightAnchor)
-        ])
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        startSpinning()
-    }
-    
-    func startSpinning() {
-        let rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
-        rotateAnimation.fromValue = 0.0
-        rotateAnimation.toValue = CGFloat(Double.pi * 2)
-        rotateAnimation.isRemovedOnCompletion = false
-        rotateAnimation.duration = 1.0
-        rotateAnimation.repeatCount = .greatestFiniteMagnitude
-        image.layer.add(rotateAnimation, forKey: "rotation")
+    private func setupSubviews() {
+        addChild(split)
+        view.addSubview(split.view)
+        split.preferredDisplayMode = .oneBesideSecondary
+        split.didMove(toParent: self)
+        split.setViewController(list, for: .primary)
+        split.setViewController(EmptyViewController(), for: .secondary)
+        // Gets rid of the collapse button
+        split.presentsWithGesture = false
+        list.delegate = self
     }
 }
 
-class WoofViewController: UIViewController {
-    let numberOfWoofs = 5
-    
-    lazy var woofs: [UILabel] = {
-        func createWoof() -> UILabel {
+extension ViewController: ListViewDelegate {
+    func didSelectCell(atIndex index: Int) {
+        let contentViewController = content[index].factory()
+        let navigationController = UINavigationController(rootViewController: contentViewController)
+        split.setViewController(navigationController, for: .secondary)
+    }
+}
+
+extension ViewController {
+    struct Content {
+        let title: String
+        let factory: () -> UIViewController
+    }
+}
+
+extension ViewController {
+    class EmptyViewController: UIViewController {
+        lazy var emptyLabel: UILabel = {
             let label = UILabel()
-            label.text = "woof"
             label.translatesAutoresizingMaskIntoConstraints = false
-            label.font = UIFont.systemFont(ofSize: 20.0)
+            label.text = "Try selecting an item on the left"
             return label
+        }()
+        
+        override func viewDidLoad() {
+            super.viewDidLoad()
+            setupSubviews()
         }
-        return (0..<numberOfWoofs).map { _ in createWoof() }
-    }()
-    
-    lazy var stack: UIStackView = {
-        let stack = UIStackView()
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        for woof in woofs {
-            stack.addArrangedSubview(woof)
-        }
-        stack.alignment = .center
-        stack.distribution = .equalSpacing
-        return stack
-    }()
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupSubviews()
-    }
-
-    func setupSubviews() {
-        view.addSubview(stack)
-        view.backgroundColor = .white
-        NSLayoutConstraint.activate([
-            stack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stack.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        startAnimation()
-    }
-    
-    func startAnimation() {
-        var delay = 0.0
-        for woof in woofs {
-            UIView.animate(withDuration: 1.0, delay: delay, options: [.repeat, .autoreverse]) {
-                woof.layer.opacity = 0.0
-            }
-            delay += 0.2
+        
+        private func setupSubviews() {
+            view.backgroundColor = .white
+            view.addSubview(emptyLabel)
+            view.backgroundColor = .white
+            NSLayoutConstraint.activate([
+                emptyLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                emptyLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            ])
         }
     }
 }
 
-#Preview("Split view controller") {
-    let split = UISplitViewController(style: .doubleColumn)
-    split.viewControllers = [DogViewController(), WoofViewController()]
-    return split
+#Preview("Split view") {
+    ViewController()
 }
-
