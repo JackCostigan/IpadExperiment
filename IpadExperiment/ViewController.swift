@@ -18,13 +18,20 @@ class ViewController: UIViewController {
     ]
     lazy var split = UISplitViewController(style: .doubleColumn)
     lazy var list = ListViewController(content: content.map { $0.title })
+    lazy var navigationStack: UINavigationController = .init(rootViewController: list)
+    lazy var ipadDelegate = IpadListViewDelegate(parent: self)
+    lazy var iphoneDelegate = IphoneListViewDelegate(parent: self)
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupSubviews()
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            setupIphoneSubviews()
+        } else {
+            setupIpadSubviews()
+        }
     }
     
-    private func setupSubviews() {
+    private func setupIpadSubviews() {
         addChild(split)
         view.addSubview(split.view)
         split.preferredDisplayMode = .oneBesideSecondary
@@ -33,15 +40,45 @@ class ViewController: UIViewController {
         split.setViewController(EmptyViewController(), for: .secondary)
         // Gets rid of the collapse button
         split.presentsWithGesture = false
-        list.delegate = self
+        list.delegate = ipadDelegate
+    }
+    
+    private func setupIphoneSubviews() {
+        addChild(navigationStack)
+        view.addSubview(navigationStack.view)
+        navigationStack.didMove(toParent: self)
+        list.delegate = iphoneDelegate
     }
 }
 
-extension ViewController: ListViewDelegate {
-    func didSelectCell(atIndex index: Int) {
-        let contentViewController = content[index].factory()
-        let navigationController = UINavigationController(rootViewController: contentViewController)
-        split.setViewController(navigationController, for: .secondary)
+extension ViewController {
+    class IphoneListViewDelegate: ListViewDelegate {
+        weak var parent: ViewController?
+        
+        init(parent: ViewController) {
+            self.parent = parent
+        }
+        
+        func didSelectCell(atIndex index: Int) {
+            guard let parent else { return }
+            let contentViewController = parent.content[index].factory()
+            parent.navigationStack.pushViewController(contentViewController, animated: true)
+        }
+    }
+    
+    class IpadListViewDelegate: ListViewDelegate {
+        weak var parent: ViewController?
+        
+        init(parent: ViewController) {
+            self.parent = parent
+        }
+        
+        func didSelectCell(atIndex index: Int) {
+            guard let parent else { return }
+            let contentViewController = parent.content[index].factory()
+            let navigationController = UINavigationController(rootViewController: contentViewController)
+            parent.split.setViewController(navigationController, for: .secondary)
+        }
     }
 }
 
