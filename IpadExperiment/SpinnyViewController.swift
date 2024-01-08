@@ -1,5 +1,5 @@
 //
-//  DogViewController.swift
+//  SpinnyViewController.swift
 //  IpadExperiment
 //
 //  Created by Jack.Costigan on 05/01/2024.
@@ -7,13 +7,24 @@
 
 import UIKit
 
-class DogViewController: UIViewController {
+class SpinnyViewController: UIViewController {
+    private let imageName: String
+    
     lazy var image: UIImageView = {
         let image = UIImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
-        image.image = UIImage(systemName: "dog.circle")
+        image.image = UIImage(systemName: imageName)
         return image
     }()
+    
+    init(imageName: String = "dog.circle") {
+        self.imageName = imageName
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,5 +58,5 @@ class DogViewController: UIViewController {
 }
 
 #Preview {
-    DogViewController()
+    SpinnyViewController()
 }

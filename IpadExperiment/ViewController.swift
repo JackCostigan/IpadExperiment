@@ -9,8 +9,12 @@ import UIKit
 
 class ViewController: UIViewController {
     let content: [Content] = [
-        .init(title: "dog") { DogViewController() },
-        .init(title: "woof") { WoofViewController() }
+        .init(title: "dog") { SpinnyViewController(imageName: "dog.circle") },
+        .init(title: "woof") { BarkViewController(bark: "woof") },
+        .init(title: "cat") { SpinnyViewController(imageName: "cat.circle") },
+        .init(title: "meow") { BarkViewController(bark: "meow") },
+        .init(title: "man") { SpinnyViewController(imageName: "figure.walk.circle") },
+        .init(title: "hello") { BarkViewController(bark: "hello") },
     ]
     lazy var split = UISplitViewController(style: .doubleColumn)
     lazy var list = ListViewController(content: content.map { $0.title })
