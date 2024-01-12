@@ -74,7 +74,7 @@ extension ListViewController {
         func setupSubviews() {
             addSubview(titleLabel)
             NSLayoutConstraint.activate([
-                titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+                titleLabel.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 10),
                 titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
             ])
         }
