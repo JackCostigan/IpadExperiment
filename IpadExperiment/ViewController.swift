@@ -23,7 +23,7 @@ class ViewController: UIViewController {
     lazy var navigationStack: UINavigationController = .init(rootViewController: list)
     lazy var ipadDelegate = IpadListViewDelegate(parent: self)
     lazy var iphoneDelegate = IphoneListViewDelegate(parent: self)
-    private let useUiSplitViewController = false
+    private let useUiSplitViewController = true
     
     override func viewDidLoad() {
         super.viewDidLoad()

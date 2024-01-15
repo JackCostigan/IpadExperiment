@@ -23,6 +23,8 @@ class ListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(Cell.self, forCellReuseIdentifier: "Cell")
+        navigationItem.title = "List"
+        navigationController?.isNavigationBarHidden = true
     }
     
     // MARK: - Table view data source
