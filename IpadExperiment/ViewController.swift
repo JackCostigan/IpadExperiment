@@ -15,8 +15,9 @@ class ViewController: UIViewController {
         .init(title: "meow") { BarkViewController(bark: "meow") },
         .init(title: "man") { SpinnyViewController(imageName: "figure.walk.circle") },
         .init(title: "hello") { BarkViewController(bark: "hello") },
+        .init(title: "example") { ExampleViewController(color: .red, text: "Example view controller") }
     ]
-    lazy var split = UISplitViewController(style: .doubleColumn)
+    lazy var split = MasterDetailViewController()
     lazy var list = ListViewController(content: content.map { $0.title })
     lazy var navigationStack: UINavigationController = .init(rootViewController: list)
     lazy var ipadDelegate = IpadListViewDelegate(parent: self)
@@ -34,12 +35,14 @@ class ViewController: UIViewController {
     private func setupIpadSubviews() {
         addChild(split)
         view.addSubview(split.view)
-        split.preferredDisplayMode = .oneBesideSecondary
+//        split.preferredDisplayMode = .oneBesideSecondary
         split.didMove(toParent: self)
-        split.setViewController(list, for: .primary)
-        split.setViewController(EmptyViewController(), for: .secondary)
+//        split.setViewController(list, for: .primary)
+        split.setMasterViewController(list)
+//        split.setViewController(EmptyViewController(), for: .secondary)
+        split.setDetailViewController(EmptyViewController())
         // Gets rid of the collapse button
-        split.presentsWithGesture = false
+//        split.presentsWithGesture = false
         list.delegate = ipadDelegate
     }
     
@@ -76,8 +79,9 @@ extension ViewController {
         func didSelectCell(atIndex index: Int) {
             guard let parent else { return }
             let contentViewController = parent.content[index].factory()
-            let navigationController = UINavigationController(rootViewController: contentViewController)
-            parent.split.setViewController(navigationController, for: .secondary)
+//            let navigationController = UINavigationController(rootViewController: contentViewController)
+//            parent.split.setViewController(navigationController, for: .secondary)
+            parent.split.setDetailViewController(contentViewController)
         }
     }
 }
