@@ -17,11 +17,13 @@ class ViewController: UIViewController {
         .init(title: "hello") { BarkViewController(bark: "hello") },
         .init(title: "example") { ExampleViewController(color: .red, text: "Example view controller") }
     ]
-    lazy var split = MasterDetailViewController()
+    lazy var mdSplit = MasterDetailViewController()
+    lazy var uiSplit = UISplitViewController(style: .doubleColumn)
     lazy var list = ListViewController(content: content.map { $0.title })
     lazy var navigationStack: UINavigationController = .init(rootViewController: list)
     lazy var ipadDelegate = IpadListViewDelegate(parent: self)
     lazy var iphoneDelegate = IphoneListViewDelegate(parent: self)
+    private let useUiSplitViewController = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,16 +35,21 @@ class ViewController: UIViewController {
     }
     
     private func setupIpadSubviews() {
-        addChild(split)
-        view.addSubview(split.view)
-//        split.preferredDisplayMode = .oneBesideSecondary
-        split.didMove(toParent: self)
-//        split.setViewController(list, for: .primary)
-        split.setMasterViewController(list)
-//        split.setViewController(EmptyViewController(), for: .secondary)
-        split.setDetailViewController(EmptyViewController())
-        // Gets rid of the collapse button
-//        split.presentsWithGesture = false
+        if useUiSplitViewController {
+            addChild(uiSplit)
+            view.addSubview(uiSplit.view)
+            uiSplit.preferredDisplayMode = .oneBesideSecondary
+            uiSplit.setViewController(list, for: .primary)
+            uiSplit.setViewController(EmptyViewController(), for: .secondary)
+            // Gets rid of the collapse button
+            uiSplit.presentsWithGesture = false
+        } else {
+            addChild(mdSplit)
+            view.addSubview(mdSplit.view)
+            mdSplit.didMove(toParent: self)
+            mdSplit.setMasterViewController(list)
+            mdSplit.setDetailViewController(EmptyViewController())
+        }
         list.delegate = ipadDelegate
     }
     
@@ -79,9 +86,12 @@ extension ViewController {
         func didSelectCell(atIndex index: Int) {
             guard let parent else { return }
             let contentViewController = parent.content[index].factory()
-//            let navigationController = UINavigationController(rootViewController: contentViewController)
-//            parent.split.setViewController(navigationController, for: .secondary)
-            parent.split.setDetailViewController(contentViewController)
+            if parent.useUiSplitViewController {
+                let navigationController = UINavigationController(rootViewController: contentViewController)
+                parent.uiSplit.setViewController(navigationController, for: .secondary)
+            } else {
+                parent.mdSplit.setDetailViewController(contentViewController)
+            }
         }
     }
 }

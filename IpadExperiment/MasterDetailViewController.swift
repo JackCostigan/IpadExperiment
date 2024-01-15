@@ -32,7 +32,7 @@ class MasterDetailViewController: UIViewController {
     private let borderWidth: Double
     
     init(ratio: Double = 2.0,
-         borderColor: UIColor = .black,
+         borderColor: UIColor = .systemGray3,
          borderWidth: Double = 1.0,
          masterViewController: UIViewController = createEmptyPlaceholderViewController(),
          detailViewController: UIViewController = createEmptyPlaceholderViewController()) {
@@ -59,10 +59,6 @@ class MasterDetailViewController: UIViewController {
         view.addSubview(detailContainer)
         addDetailViewController()
         view.addSubview(border)
-        detailContainer.layer.borderColor = UIColor.blue.cgColor
-        detailContainer.layer.borderWidth = 3.0
-        masterContainer.layer.borderColor = UIColor.blue.cgColor
-        masterContainer.layer.borderWidth = 3.0
         NSLayoutConstraint.activate([
             masterContainer.topAnchor.constraint(equalTo: view.topAnchor),
             masterContainer.bottomAnchor.constraint(equalTo: view.bottomAnchor),
