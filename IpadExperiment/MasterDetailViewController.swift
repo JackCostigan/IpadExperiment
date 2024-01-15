@@ -94,26 +94,29 @@ class MasterDetailViewController: UIViewController {
     }
     
     func setMasterViewController(_ vc: UIViewController) {
-        self.masterViewController.willMove(toParent: nil)
-        self.masterViewController.view.removeFromSuperview()
-        self.masterViewController.removeFromParent()
+        let oldViewController = self.masterViewController
         self.masterViewController = vc
         addMasterViewController()
+        oldViewController.willMove(toParent: nil)
+        oldViewController.view.removeFromSuperview()
+        oldViewController.removeFromParent()
     }
     
     func setDetailViewController(_ vc: UIViewController) {
-        self.detailViewController.willMove(toParent: nil)
-        self.detailViewController.view.removeFromSuperview()
-        self.detailViewController.removeFromParent()
+        let oldViewController = self.detailViewController
         self.detailViewController = vc
         addDetailViewController()
+        oldViewController.willMove(toParent: nil)
+        oldViewController.view.removeFromSuperview()
+        oldViewController.removeFromParent()
     }
     
     private func addMasterViewController() {
         addChild(masterViewController)
+        masterViewController.view.frame = masterContainer.frame
         masterContainer.addSubview(masterViewController.view)
         masterViewController.didMove(toParent: self)
-        masterViewController.view.frame = masterContainer.frame
+        masterViewController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             masterViewController.view.leadingAnchor.constraint(equalTo: masterContainer.leadingAnchor),
             masterViewController.view.trailingAnchor.constraint(equalTo: masterContainer.trailingAnchor),
@@ -124,9 +127,10 @@ class MasterDetailViewController: UIViewController {
     
     private func addDetailViewController() {
         addChild(detailViewController)
+        detailViewController.view.frame = detailContainer.frame
         detailContainer.addSubview(detailViewController.view)
         detailViewController.didMove(toParent: self)
-        detailViewController.view.frame = detailContainer.frame
+        detailViewController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             detailViewController.view.leadingAnchor.constraint(equalTo: detailContainer.leadingAnchor),
             detailViewController.view.trailingAnchor.constraint(equalTo: detailContainer.trailingAnchor),
