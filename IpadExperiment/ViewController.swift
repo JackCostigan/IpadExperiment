@@ -29,6 +29,7 @@ class ViewController: UIViewController {
     lazy var uiSplit = UISplitViewController(style: .doubleColumn)
     lazy var list = ListViewController(content: content.map { $0.title })
     lazy var ipadDelegate = IpadListViewDelegate(parent: self)
+    lazy var noSelectionViewController = EmptyViewController()
     private let useUiSplitViewController = true
     
     override func viewDidLoad() {
@@ -55,7 +56,7 @@ class ViewController: UIViewController {
             uiSplit.preferredDisplayMode = .oneBesideSecondary
             uiSplit.preferredSplitBehavior = .tile
             uiSplit.setViewController(list, for: .primary)
-            uiSplit.setViewController(EmptyViewController(), for: .secondary)
+            uiSplit.setViewController(noSelectionViewController, for: .secondary)
             uiSplit.delegate = self
             // Gets rid of the collapse button
             uiSplit.presentsWithGesture = false
@@ -94,21 +95,22 @@ extension ViewController: UISplitViewControllerDelegate {
     
     func splitViewControllerDidCollapse(_ svc: UISplitViewController) {
         // called when the secondary view is hidden
-        // merge view controllers
         print("XXX split view controller did collapse \(svc.viewControllers) | \((svc.viewControllers.first as? UINavigationController)?.viewControllers)")
+        uiSplit.viewController(for: .primary)?.navigationController?.isNavigationBarHidden = false
     }
 
     func splitViewControllerDidExpand(_ svc: UISplitViewController) {
         // called when the secondary view is shown again
-        // split up the view controllers
         print("XXX split view conmtrolelr did expand \(svc.viewControllers) | \((svc.viewControllers.first as? UINavigationController)?.viewControllers)")
+        uiSplit.viewController(for: .primary)?.navigationController?.isNavigationBarHidden = true
     }
 
     func splitViewController(_ svc: UISplitViewController, 
                              topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column) -> UISplitViewController.Column {
         print("XXX split view controller top column for collapsing to proposed: \(proposedTopColumn)")
         // Could I return a different value here depending on whether or not the secondary view controller is empty?
-        return .primary
+        let secondaryViewController = uiSplit.viewController(for: .secondary)
+        return secondaryViewController == noSelectionViewController ? .primary : .secondary
     }
 }
 
