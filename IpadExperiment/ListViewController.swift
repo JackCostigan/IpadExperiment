@@ -24,7 +24,7 @@ class ListViewController: UITableViewController {
         super.viewDidLoad()
         tableView.register(Cell.self, forCellReuseIdentifier: "Cell")
         navigationItem.title = "List"
-        navigationController?.isNavigationBarHidden = true
+        //navigationController?.isNavigationBarHidden = true
     }
     
     // MARK: - Table view data source

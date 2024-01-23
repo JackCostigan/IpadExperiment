@@ -7,8 +7,16 @@
 
 import UIKit
 
+// TODO
+// Setup same heirarchy on both iphone and ipad
+// setup delegate methods
+// figure out what I need to do to get the desired correct navigation when pushing to secondary
+
+
+
 class ViewController: UIViewController {
-    let content: [Content] = [
+    lazy var content: [Content] = [
+        .init(title: "pushy") { [weak self] in self!.createPushyViewController(atDepth: 0) },
         .init(title: "dog") { SpinnyViewController(imageName: "dog.circle") },
         .init(title: "woof") { BarkViewController(bark: "woof") },
         .init(title: "cat") { SpinnyViewController(imageName: "cat.circle") },
@@ -20,18 +28,24 @@ class ViewController: UIViewController {
     lazy var mdSplit = MasterDetailViewController()
     lazy var uiSplit = UISplitViewController(style: .doubleColumn)
     lazy var list = ListViewController(content: content.map { $0.title })
-    lazy var navigationStack: UINavigationController = .init(rootViewController: list)
     lazy var ipadDelegate = IpadListViewDelegate(parent: self)
-    lazy var iphoneDelegate = IphoneListViewDelegate(parent: self)
     private let useUiSplitViewController = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            setupIphoneSubviews()
-        } else {
-            setupIpadSubviews()
+        setupIpadSubviews()
+    }
+    
+    private func createPushyViewController(atDepth: Int) -> PushViewController {
+        let vc = PushViewController(depth: atDepth)
+        vc.buttonCallback = { [weak self] _ in
+            guard let self else {
+                return
+            }
+            let vc = createPushyViewController(atDepth: atDepth+1)
+            pushSecondaryScreen(vc)
         }
+        return vc
     }
     
     private func setupIpadSubviews() {
@@ -39,8 +53,10 @@ class ViewController: UIViewController {
             addChild(uiSplit)
             view.addSubview(uiSplit.view)
             uiSplit.preferredDisplayMode = .oneBesideSecondary
+            uiSplit.preferredSplitBehavior = .tile
             uiSplit.setViewController(list, for: .primary)
             uiSplit.setViewController(EmptyViewController(), for: .secondary)
+            uiSplit.delegate = self
             // Gets rid of the collapse button
             uiSplit.presentsWithGesture = false
         } else {
@@ -53,29 +69,50 @@ class ViewController: UIViewController {
         list.delegate = ipadDelegate
     }
     
-    private func setupIphoneSubviews() {
-        addChild(navigationStack)
-        view.addSubview(navigationStack.view)
-        navigationStack.didMove(toParent: self)
-        list.delegate = iphoneDelegate
+    func pushSecondaryScreen(_ viewController: UIViewController) {
+        guard let secondarViewController = uiSplit.viewController(for: .secondary),
+              let navigationController = secondarViewController as? UINavigationController
+//              let navigationController = uiSplit.viewController(for: .secondary)?.navigationController,
+        else {
+            return
+        }
+        navigationController.pushViewController(viewController, animated: true)
+    }
+    
+    func setSecondaryScreen(_ viewController: UIViewController) {
+        // NOTE: If you want to replace the current secondary screen, make sure to wrap in a navigation controller.
+        // This will ensure that old secondary screens are removed from the back stack
+        let navigationController = UINavigationController(rootViewController: viewController)
+        uiSplit.showDetailViewController(navigationController, sender: self)
+    }
+}
+
+extension ViewController: UISplitViewControllerDelegate {
+    // NOTES
+    // Need to show/hide primary vc navigation bar when the view is collapsed/expanded
+    // Need to add/remove empty view controller based on expanded/collapsed
+    
+    func splitViewControllerDidCollapse(_ svc: UISplitViewController) {
+        // called when the secondary view is hidden
+        // merge view controllers
+        print("XXX split view controller did collapse \(svc.viewControllers) | \((svc.viewControllers.first as? UINavigationController)?.viewControllers)")
+    }
+
+    func splitViewControllerDidExpand(_ svc: UISplitViewController) {
+        // called when the secondary view is shown again
+        // split up the view controllers
+        print("XXX split view conmtrolelr did expand \(svc.viewControllers) | \((svc.viewControllers.first as? UINavigationController)?.viewControllers)")
+    }
+
+    func splitViewController(_ svc: UISplitViewController, 
+                             topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column) -> UISplitViewController.Column {
+        print("XXX split view controller top column for collapsing to proposed: \(proposedTopColumn)")
+        // Could I return a different value here depending on whether or not the secondary view controller is empty?
+        return .primary
     }
 }
 
 extension ViewController {
-    class IphoneListViewDelegate: ListViewDelegate {
-        weak var parent: ViewController?
-        
-        init(parent: ViewController) {
-            self.parent = parent
-        }
-        
-        func didSelectCell(atIndex index: Int) {
-            guard let parent else { return }
-            let contentViewController = parent.content[index].factory()
-            parent.navigationStack.pushViewController(contentViewController, animated: true)
-        }
-    }
-    
     class IpadListViewDelegate: ListViewDelegate {
         weak var parent: ViewController?
         
@@ -87,8 +124,7 @@ extension ViewController {
             guard let parent else { return }
             let contentViewController = parent.content[index].factory()
             if parent.useUiSplitViewController {
-                let navigationController = UINavigationController(rootViewController: contentViewController)
-                parent.uiSplit.setViewController(navigationController, for: .secondary)
+                parent.setSecondaryScreen(contentViewController)
             } else {
                 parent.mdSplit.setDetailViewController(contentViewController)
             }
