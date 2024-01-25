@@ -30,7 +30,7 @@ class ViewController: UIViewController {
     lazy var list = ListViewController(content: content.map { $0.title })
     lazy var ipadDelegate = IpadListViewDelegate(parent: self)
     lazy var noSelectionViewController = EmptyViewController()
-    private let useUiSplitViewController = true
+    private let useUiSplitViewController = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,11 +40,12 @@ class ViewController: UIViewController {
     private func createPushyViewController(atDepth: Int) -> PushViewController {
         let vc = PushViewController(depth: atDepth)
         vc.buttonCallback = { [weak self] _ in
-            guard let self else {
-                return
-            }
-            let vc = createPushyViewController(atDepth: atDepth+1)
-            pushSecondaryScreen(vc)
+//            guard let self else {
+//                return
+//            }
+//            let vc = createPushyViewController(atDepth: atDepth+1)
+//            pushSecondaryScreen(vc)
+            self?.mdSplit.collapse()
         }
         return vc
     }

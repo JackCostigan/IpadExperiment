@@ -134,6 +134,37 @@ class MasterDetailViewController: UIViewController {
             detailViewController.view.bottomAnchor.constraint(equalTo: detailContainer.bottomAnchor),
         ])
     }
+    
+    func expand() {
+        // deactivate one set of constraints
+        // activate another
+        // remove views
+    }
+    
+    func collapse() {
+        containerWidthConstraint.isActive = false
+        detailContainer.widthAnchor.constraint(equalToConstant: 0.0).isActive = true
+        detailViewController.view.removeFromSuperview()
+        detailViewController.didMove(toParent: nil)
+        detailViewController.removeFromParent()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        print("XXX view did layout subviews \(view.bounds) XXX")
+        if view.bounds.width < 500 {
+            // send message to a delegate
+            // remove master view
+        }
+    }
+    
+    override func willTransition(
+        to newCollection: UITraitCollection,
+        with coordinator: UIViewControllerTransitionCoordinator
+    ) {
+        super.willTransition(to: newCollection, with: coordinator)
+        print("XXX will transition \(view.bounds) XXX")
+    }
 }
 
 class ExampleViewController: UIViewController {
