@@ -62,6 +62,10 @@ class BarkViewController: UIViewController {
     }
     
     func startAnimation() {
+        for woof in woofs {
+            woof.layer.removeAllAnimations()
+            woof.layer.opacity = 1.0
+        }
         var delay = 0.0
         for woof in woofs {
             UIView.animate(withDuration: 1.0, delay: delay, options: [.repeat, .autoreverse]) {
