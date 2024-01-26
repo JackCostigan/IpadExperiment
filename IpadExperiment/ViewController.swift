@@ -23,7 +23,8 @@ class ViewController: UIViewController {
         .init(title: "meow") { BarkViewController(bark: "meow") },
         .init(title: "man") { SpinnyViewController(imageName: "figure.walk.circle") },
         .init(title: "hello") { BarkViewController(bark: "hello") },
-        .init(title: "example") { ExampleViewController(color: .red, text: "Example view controller") }
+        .init(title: "example") { ExampleViewController(color: .red, text: "Example view controller") },
+        .init(title: "empty") { EmptyViewController() }
     ]
     lazy var mdSplit = MasterDetailViewController()
     lazy var uiSplit = UISplitViewController(style: .doubleColumn)
@@ -142,7 +143,7 @@ extension ViewController {
     }
 }
 
-extension ViewController {
+//extension ViewController {
     class EmptyViewController: UIViewController {
         lazy var emptyLabel: UILabel = {
             let label = UILabel()
@@ -166,7 +167,7 @@ extension ViewController {
             ])
         }
     }
-}
+//}
 
 #Preview("Split view") {
     ViewController()

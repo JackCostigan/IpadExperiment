@@ -21,6 +21,8 @@ class MasterDetailViewController: UIViewController {
         return view
     }()
     private lazy var containerWidthConstraint = detailContainer.widthAnchor.constraint(equalTo: masterContainer.widthAnchor, multiplier: ratio)
+    private lazy var masterWidthConstraint = masterContainer.widthAnchor.constraint(equalToConstant: 0.0)
+    private lazy var detailWidthConstraint = detailContainer.widthAnchor.constraint(equalToConstant: 0.0)
     private let ratio: Double
     private lazy var border: UIView = {
         let view = UIView()
@@ -30,6 +32,8 @@ class MasterDetailViewController: UIViewController {
     }()
     private let borderColor: UIColor
     private let borderWidth: Double
+    
+    private var isCollapsed: Bool = false
     
     init(ratio: Double = 2.0,
          borderColor: UIColor = .systemGray3,
@@ -99,12 +103,16 @@ class MasterDetailViewController: UIViewController {
     }
     
     func setDetailViewController(_ vc: UIViewController) {
-        let oldViewController = self.detailViewController
-        self.detailViewController = vc
-        addDetailViewController()
-        oldViewController.willMove(toParent: nil)
-        oldViewController.view.removeFromSuperview()
-        oldViewController.removeFromParent()
+        if isCollapsed {
+            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            let oldViewController = self.detailViewController
+            self.detailViewController = vc
+            addDetailViewController()
+            oldViewController.willMove(toParent: nil)
+            oldViewController.view.removeFromSuperview()
+            oldViewController.removeFromParent()
+        }
     }
     
     private func addMasterViewController() {
@@ -139,14 +147,23 @@ class MasterDetailViewController: UIViewController {
         // deactivate one set of constraints
         // activate another
         // remove views
+        masterWidthConstraint.isActive = false
+        detailWidthConstraint.isActive = false
+        containerWidthConstraint.isActive = true
+        addDetailViewController()
     }
     
     func collapse() {
-        containerWidthConstraint.isActive = false
-        detailContainer.widthAnchor.constraint(equalToConstant: 0.0).isActive = true
-        detailViewController.view.removeFromSuperview()
-        detailViewController.didMove(toParent: nil)
-        detailViewController.removeFromParent()
+        if detailViewController is EmptyViewController {
+            containerWidthConstraint.isActive = false
+            detailWidthConstraint.isActive = true
+            detailViewController.view.removeFromSuperview()
+            detailViewController.didMove(toParent: nil)
+            detailViewController.removeFromParent()
+        } else {
+            containerWidthConstraint.isActive = false
+            masterWidthConstraint.isActive = true
+        }
     }
     
     override func viewDidLayoutSubviews() {
@@ -155,6 +172,11 @@ class MasterDetailViewController: UIViewController {
         if view.bounds.width < 500 {
             // send message to a delegate
             // remove master view
+            collapse()
+            isCollapsed = true
+        } else {
+            expand()
+            isCollapsed = false
         }
     }
     
