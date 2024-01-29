@@ -108,7 +108,9 @@ class MasterDetailViewController: UIViewController {
     
     func setDetailViewController(_ vc: UIViewController) {
         if isCollapsed {
+            self.detailViewController = vc
             navigationController?.pushViewController(vc, animated: true)
+            pushedViewController = vc
         } else {
             let oldViewController = self.detailViewController
             self.detailViewController = vc
