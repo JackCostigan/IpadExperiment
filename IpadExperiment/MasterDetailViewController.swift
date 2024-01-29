@@ -23,6 +23,8 @@ class MasterDetailViewController: UIViewController {
     private lazy var containerWidthConstraint = detailContainer.widthAnchor.constraint(equalTo: masterContainer.widthAnchor, multiplier: ratio)
     private lazy var masterWidthConstraint = masterContainer.widthAnchor.constraint(equalToConstant: 0.0)
     private lazy var detailWidthConstraint = detailContainer.widthAnchor.constraint(equalToConstant: 0.0)
+    private lazy var masterFullConstraints: [NSLayoutConstraint] = []
+    private lazy var detailFullConstraints: [NSLayoutConstraint] = []
     private let ratio: Double
     private lazy var border: UIView = {
         let view = UIView()
@@ -34,6 +36,7 @@ class MasterDetailViewController: UIViewController {
     private let borderWidth: Double
     
     private var isCollapsed: Bool = false
+    private var hasPushed: Bool = false
     
     init(ratio: Double = 2.0,
          borderColor: UIColor = .systemGray3,
@@ -121,12 +124,13 @@ class MasterDetailViewController: UIViewController {
         masterContainer.addSubview(masterViewController.view)
         masterViewController.didMove(toParent: self)
         masterViewController.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
+        masterFullConstraints = [
             masterViewController.view.leadingAnchor.constraint(equalTo: masterContainer.leadingAnchor),
             masterViewController.view.trailingAnchor.constraint(equalTo: masterContainer.trailingAnchor),
             masterViewController.view.topAnchor.constraint(equalTo: masterContainer.topAnchor),
             masterViewController.view.bottomAnchor.constraint(equalTo: masterContainer.bottomAnchor),
-        ])
+        ]
+        NSLayoutConstraint.activate(masterFullConstraints)
     }
     
     private func addDetailViewController() {
@@ -135,15 +139,17 @@ class MasterDetailViewController: UIViewController {
         detailContainer.addSubview(detailViewController.view)
         detailViewController.didMove(toParent: self)
         detailViewController.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
+        detailFullConstraints = [
             detailViewController.view.leadingAnchor.constraint(equalTo: detailContainer.leadingAnchor),
             detailViewController.view.trailingAnchor.constraint(equalTo: detailContainer.trailingAnchor),
             detailViewController.view.topAnchor.constraint(equalTo: detailContainer.topAnchor),
             detailViewController.view.bottomAnchor.constraint(equalTo: detailContainer.bottomAnchor),
-        ])
+        ]
+        NSLayoutConstraint.activate(detailFullConstraints)
     }
     
     func expand() {
+        isCollapsed = false
         // deactivate one set of constraints
         // activate another
         // remove views
@@ -151,9 +157,11 @@ class MasterDetailViewController: UIViewController {
         detailWidthConstraint.isActive = false
         containerWidthConstraint.isActive = true
         addDetailViewController()
+//        navigationController?.popViewController(animated: true)
     }
     
     func collapse() {
+        isCollapsed = true
         if detailViewController is EmptyViewController {
             containerWidthConstraint.isActive = false
             detailWidthConstraint.isActive = true
@@ -161,31 +169,112 @@ class MasterDetailViewController: UIViewController {
             detailViewController.didMove(toParent: nil)
             detailViewController.removeFromParent()
         } else {
-            containerWidthConstraint.isActive = false
-            masterWidthConstraint.isActive = true
+            if hasPushed {
+                hasPushed = false
+                masterWidthConstraint.isActive = false
+                containerWidthConstraint.isActive = false
+                detailWidthConstraint.isActive = true
+                addMasterViewController()
+//                addDetailViewController()
+            } else {
+                //            containerWidthConstraint.isActive = false
+                //            masterWidthConstraint.isActive = false
+                //            detailWidthConstraint.isActive = false
+                
+                //            masterContainer.removeFromSuperview()
+                //            masterViewController.willMove(toParent: nil)
+                //            masterViewController.view.removeFromSuperview()
+                //            masterViewController.removeFromParent()
+                //            masterViewController.view.removeConstraints(masterViewController.view.constraints)
+                
+                //            detailContainer.removeFromSuperview()
+                //            detailViewController.willMove(toParent: nil)
+                //            detailViewController.view.removeFromSuperview()
+                //            detailViewController.removeFromParent()
+                //            detailViewController.view.removeConstraints(detailViewController.view.constraints)
+                
+                //            NSLayoutConstraint.deactivate(masterFullConstraints)
+                //            NSLayoutConstraint.deactivate(detailFullConstraints)
+                
+                //            let masterVc = UIViewController()
+                //            masterVc.addChild(masterViewController)
+                //            masterVc.view.addSubview(masterViewController.view)
+                //            masterViewController.didMove(toParent: masterVc)
+                //            NSLayoutConstraint.deactivate(masterFullConstraints)
+                //            masterFullConstraints = [
+                //                masterViewController.view.leadingAnchor.constraint(equalTo: masterVc.view.leadingAnchor),
+                //                masterViewController.view.trailingAnchor.constraint(equalTo: masterVc.view.trailingAnchor),
+                //                masterViewController.view.topAnchor.constraint(equalTo: masterVc.view.topAnchor),
+                //                masterViewController.view.bottomAnchor.constraint(equalTo: masterVc.view.bottomAnchor),
+                //            ]
+                //            NSLayoutConstraint.activate(masterFullConstraints)
+                
+                let detailVc = UIViewController()
+                detailVc.addChild(detailViewController)
+                detailVc.view.addSubview(detailViewController.view)
+                detailViewController.didMove(toParent: detailVc)
+                NSLayoutConstraint.deactivate(detailFullConstraints)
+                detailFullConstraints = [
+                    detailViewController.view.leadingAnchor.constraint(equalTo: detailVc.view.leadingAnchor),
+                    detailViewController.view.trailingAnchor.constraint(equalTo: detailVc.view.trailingAnchor),
+                    detailViewController.view.topAnchor.constraint(equalTo: detailVc.view.topAnchor),
+                    detailViewController.view.bottomAnchor.constraint(equalTo: detailVc.view.bottomAnchor),
+                ]
+                NSLayoutConstraint.activate(detailFullConstraints)
+                
+                //            navigationController?.pushViewController(masterVc, animated: false)
+                navigationController?.pushViewController(detailVc, animated: false)
+                hasPushed = true
+            }
+//            navigationController?.viewControllers.removeAll(where: {$0 == parent})
+//            navigationController?.viewControllers.append(masterVc)
+//            navigationController?.viewControllers.append(detailVc)
+            
+//            navigationController?.viewControllers.append(masterViewController)
+//            navigationController?.viewControllers.append(detailViewController)
+            
+//            navigationController?.setViewControllers([masterViewController, detailViewController], animated: true)
+//            navigationController?.setViewControllers([SpinnyViewController(imageName: "cat.circle"), SpinnyViewController(imageName: "cat.circle")], animated: true)
+//            navigationController?.pushViewController(detailViewController, animated: true)
         }
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         print("XXX view did layout subviews \(view.bounds) XXX")
-        if view.bounds.width < 500 {
-            // send message to a delegate
-            // remove master view
+        if traitCollection.horizontalSizeClass == .compact {
             collapse()
-            isCollapsed = true
         } else {
             expand()
-            isCollapsed = false
         }
+//        if view.bounds.width < 500 {
+//            // send message to a delegate
+//            // remove master view
+//            collapse()
+//            isCollapsed = true
+//        } else {
+//            expand()
+//            isCollapsed = false
+//        }
     }
+    
+//    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+//        super.viewWillTransition(to: size, with: coordinator)
+//        print("XXX viewWillTransition \(view.bounds) XXX")
+//    }
     
     override func willTransition(
         to newCollection: UITraitCollection,
         with coordinator: UIViewControllerTransitionCoordinator
     ) {
         super.willTransition(to: newCollection, with: coordinator)
+        if newCollection.horizontalSizeClass == .compact {
+            collapse()
+        } else {
+            expand()
+        }
         print("XXX will transition \(view.bounds) XXX")
+        print("XXX \(newCollection.horizontalSizeClass) XXX")
     }
 }
 

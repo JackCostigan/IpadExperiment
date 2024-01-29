@@ -13,6 +13,31 @@ import UIKit
 // figure out what I need to do to get the desired correct navigation when pushing to secondary
 
 
+class RootViewController: UIViewController {
+    private lazy var button: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.backgroundColor = .red
+        button.setTitle("click me", for: .normal)
+        button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+        button.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        return button
+    }()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        title = "Im More"
+        view.backgroundColor = .white
+        view.addSubview(button)
+        
+        button.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        button.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+    }
+    
+    @objc func buttonTapped() {
+        navigationController?.pushViewController(ViewController(), animated: true)
+    }
+}
 
 class ViewController: UIViewController {
     lazy var content: [Content] = [
@@ -35,6 +60,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = "Im Contacts"
         setupIpadSubviews()
     }
     
