@@ -37,6 +37,7 @@ class MasterDetailViewController: UIViewController {
     
     private var isCollapsed: Bool = false
     private var hasPushed: Bool = false
+    private var pushedViewController: UIViewController?
     
     init(ratio: Double = 2.0,
          borderColor: UIColor = .systemGray3,
@@ -153,6 +154,10 @@ class MasterDetailViewController: UIViewController {
         // deactivate one set of constraints
         // activate another
         // remove views
+        if let navigationController, navigationController.viewControllers.contains(where: {$0 == pushedViewController}) {
+            navigationController.popViewController(animated: false)
+//            addMasterViewController()
+        }
         masterWidthConstraint.isActive = false
         detailWidthConstraint.isActive = false
         containerWidthConstraint.isActive = true
@@ -221,6 +226,7 @@ class MasterDetailViewController: UIViewController {
                     detailViewController.view.bottomAnchor.constraint(equalTo: detailVc.view.bottomAnchor),
                 ]
                 NSLayoutConstraint.activate(detailFullConstraints)
+                pushedViewController = detailVc
                 
                 //            navigationController?.pushViewController(masterVc, animated: false)
                 navigationController?.pushViewController(detailVc, animated: false)
